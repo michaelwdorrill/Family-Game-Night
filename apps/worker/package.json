@@ -1,0 +1,25 @@
+{
+  "name": "@family-game-night/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "wrangler deploy --env=\"\" --dry-run --outdir dist",
+    "db:migrate:local": "wrangler d1 migrations apply family-game-night --local --env=\"\"",
+    "db:migrate:remote": "wrangler d1 migrations apply family-game-night --remote --env production",
+    "deploy": "wrangler deploy --env production",
+    "dev": "wrangler dev --env=\"\" --port 8787",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@family-game-night/shared": "workspace:*",
+    "hono": "4.13.5",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260902.1",
+    "wrangler": "4.128.0"
+  }
+}

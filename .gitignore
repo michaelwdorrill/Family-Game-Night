@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.wrangler/
+.vite/
+.npm-cache/
+.corepack/
+.dev.vars
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+playwright-report/
+test-results/
+.DS_Store
+Thumbs.db

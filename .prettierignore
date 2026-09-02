@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.wrangler/
+.npm-cache/
+.corepack/
+pnpm-lock.yaml
+family-game-night-sequence-codex-spec.md

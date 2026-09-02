@@ -1,0 +1,13 @@
+packages:
+  - apps/*
+  - packages/*
+
+allowBuilds:
+  esbuild: true
+  workerd: true
+
+minimumReleaseAgeExclude:
+  - '@cloudflare/workers-types@5.20260902.1'
+  - globals@17.12.0
+  - miniflare@5.20260831.0-alpha
+  - wrangler@4.128.0

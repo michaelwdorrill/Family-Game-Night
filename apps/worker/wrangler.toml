@@ -1,0 +1,26 @@
+name = "family-game-night-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-02"
+workers_dev = false
+
+[vars]
+ENVIRONMENT = "development"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "family-game-night"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "../../migrations"
+
+[env.production]
+name = "family-game-night-api"
+workers_dev = false
+
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "family-game-night"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "../../migrations"
