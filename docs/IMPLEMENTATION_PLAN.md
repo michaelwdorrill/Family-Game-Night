@@ -43,53 +43,58 @@ This plan translates the authoritative Sequence-style MVP specification into rev
 
 ## Milestone 2 — Authentication, persistence, and command API
 
-- [ ] Add strict environment parsing and fail closed when development auth settings appear in production.
-- [ ] Validate Cloudflare Access JWT signature, issuer, audience, expiration, and not-before claims using cached JWKS.
-- [ ] Normalize verified email identity, auto-provision users, and support first-admin configuration.
-- [ ] Implement profile and allowlisted family-directory endpoints.
-- [ ] Implement create, invite, accept/decline, lobby assignment, seat preview, start, and cancel endpoints.
-- [ ] Add the typed one-entry game-module registry for `sequence`.
-- [ ] Parse every persisted engine snapshot at load time and build dedicated redacted DTOs.
-- [ ] Implement the command endpoint with strict discriminated request schemas and server-authoritative engine validation.
-- [ ] Require expected versions and canonical command IDs/hashes for every mutation.
-- [ ] Atomically persist the conditional snapshot update and one version-matched public event.
-- [ ] Return exact retries idempotently and reject command-ID reuse with different content.
-- [ ] Scope every read/write to the authenticated member; enforce host/admin/current-turn permissions.
-- [ ] Add API tests for authentication, authorization, privacy, concurrency, idempotency, atomicity, and all lobby mutations.
-- [ ] Verify query plans for dashboard filters and avoid unbounded scans.
+- [x] Add strict environment parsing and fail closed when development auth settings appear in production.
+- [x] Validate Cloudflare Access JWT signature, issuer, audience, expiration, and not-before claims using cached JWKS.
+- [x] Normalize verified email identity, auto-provision users, and support first-admin configuration.
+- [x] Implement profile and allowlisted family-directory endpoints.
+- [x] Implement create, invite, accept/decline, lobby assignment, seat preview, start, and cancel endpoints.
+- [x] Add the typed one-entry game-module registry for `sequence`.
+- [x] Parse every persisted engine snapshot at load time and build dedicated redacted DTOs.
+- [x] Implement the command endpoint with strict discriminated request schemas and server-authoritative engine validation.
+- [x] Require expected versions and canonical command IDs/hashes for every mutation.
+- [x] Atomically persist the conditional snapshot update and one version-matched public event.
+- [x] Return exact retries idempotently and reject command-ID reuse with different content.
+- [x] Scope every read/write to the authenticated member; enforce host/admin/current-turn permissions.
+- [x] Add API tests for authentication, authorization, privacy, concurrency, idempotency, atomicity, and all lobby mutations.
+- [x] Verify query plans for dashboard filters and avoid unbounded scans.
 
 ## Milestone 3 — Dashboard and lobby UI
 
-- [ ] Implement authenticated loading, expired-session handling, logout, and first-login display-name confirmation.
-- [ ] Add dashboard buckets for Your Turn, Invitations, Waiting on Others, and paginated/collapsed Finished Games.
-- [ ] Add the Card Lines game picker and disabled future-game placeholders.
-- [ ] Implement the create-game flow and invitation management.
-- [ ] Implement equal-team assignment with precise validation messages and automatic seat-order preview.
-- [ ] Implement invitation acceptance/decline plus host start/cancel controls.
-- [ ] Add loading, empty, offline, stale-session, and recoverable error states.
-- [ ] Add component and API-contract tests for the complete lobby journey.
+- [x] Implement authenticated loading, expired-session handling, logout, and first-login display-name confirmation.
+- [x] Add dashboard buckets for Your Turn, Invitations, Waiting on Others, and paginated/collapsed Finished Games.
+- [x] Add the Card Lines game picker and disabled future-game placeholders.
+- [x] Implement the create-game flow and invitation management.
+- [x] Implement equal-team assignment with precise validation messages and automatic seat-order preview.
+- [x] Implement invitation acceptance/decline plus host start/cancel controls.
+- [x] Add loading, empty, offline, stale-session, and recoverable error states.
+- [x] Add component and API-contract tests for the complete lobby journey.
 
 ## Milestone 4 — Full game UI
 
-- [ ] Build the responsive, accessible 10×10 board with 44px mobile targets and horizontal scrolling.
-- [ ] Add semantic grid navigation, arrow keys, descriptive cell labels, visible focus, and non-color status cues.
-- [ ] Render original CSS/SVG playing cards with accessible suit and Jack behavior labels.
-- [ ] Implement card selection, legal-target display, move preview, explicit confirm/cancel, and authoritative response replacement.
-- [ ] Implement one-eyed/two-eyed Jack interactions, dead-card exchange, and conditional pass.
-- [ ] Implement ambiguous sequence-choice overlays and exact resubmission.
-- [ ] Render claimed sequences, protected chips, overlap cells, last move, scores, and winner state.
-- [ ] Add seat order, hand counts, move history, rules, deck/discard counts, and waiting status panels.
-- [ ] Poll only while visible, refresh on focus/reconnect, stop for terminal games, and recover stale tabs from `409`.
-- [ ] Add screen-reader announcements, focus-managed dialogs, reduced motion, and manual accessibility checklist.
-- [ ] Add desktop/mobile end-to-end coverage without exposing hidden state in network responses.
+- [x] Build the responsive, accessible 10×10 board with 44px mobile targets and horizontal scrolling.
+- [x] Add semantic grid navigation, arrow keys, descriptive cell labels, visible focus, and non-color status cues.
+- [x] Render original CSS/SVG playing cards with accessible suit and Jack behavior labels.
+- [x] Implement card selection, legal-target display, move preview, explicit confirm/cancel, and authoritative response replacement.
+- [x] Implement one-eyed/two-eyed Jack interactions, dead-card exchange, and conditional pass.
+- [x] Implement ambiguous sequence-choice overlays and exact resubmission.
+- [x] Render claimed sequences, protected chips, overlap cells, last move, scores, and winner state.
+- [x] Add seat order, hand counts, move history, rules, deck/discard counts, and waiting status panels.
+- [x] Poll only while visible, refresh on focus/reconnect, stop for terminal games, and recover stale tabs from `409`.
+- [x] Add screen-reader announcements, focus-managed dialogs, reduced motion, and manual accessibility checklist.
+- [x] Complete desktop/mobile end-to-end coverage without exposing hidden state in network responses.
+  - [x] Add the first deterministic browser slice for lobby creation and confirmed play in desktop and mobile Chromium projects.
+  - [x] Drive a two-user create/invite/accept/team/start/play/resume journey through the real Worker and an isolated D1 database.
+  - [x] Compare real response bodies with persisted private hands and prove that neither player receives the other's card-instance IDs.
 
 ## Milestone 5 — Hardening and production launch
 
-- [ ] Complete the Playwright flows for two users, deterministic wins, Jacks, exchange, stale tabs, mobile play, and response privacy.
+- [x] Complete the Playwright flows for two users, deterministic wins, Jacks, exchange, stale tabs, mobile play, and response privacy.
 - [ ] Run automated and manual accessibility audits and fix failures.
-- [ ] Add restrictive deployment-compatible CSP and security headers with no third-party scripts.
-- [ ] Add structured request-ID logging that excludes tokens, hands, deck order, and snapshots.
-- [ ] Finalize migration, deployment, backup/restore, admin, cancellation, log, secret-rotation, and quota runbooks.
+  - [x] Run `axe-core` in the component suite and fix the board's required grid-row hierarchy.
+  - [x] Run browser-based `axe-core` audits for the dashboard, lobby, and active board in both desktop and mobile projects.
+- [x] Add restrictive deployment-compatible CSP and security headers with no third-party scripts.
+- [x] Add structured request-ID logging that excludes tokens, hands, deck order, and snapshots.
+- [x] Finalize migration, deployment, backup/restore, admin, cancellation, log, secret-rotation, and quota runbooks.
 - [ ] Validate production configuration before deployment and run migrations deliberately.
 - [ ] Deploy GitHub Pages and the `/api/*` Worker route after CI passes.
 - [ ] Configure Cloudflare Access OTP with an explicit family allowlist.

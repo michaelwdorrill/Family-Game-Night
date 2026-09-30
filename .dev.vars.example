@@ -3,6 +3,6 @@
 ENVIRONMENT=development
 DEV_AUTH_EMAIL=developer@example.test
 ADMIN_EMAIL=admin@example.test
-APP_ORIGIN=http://localhost:5173
+APP_ORIGIN=http://127.0.0.1:5173
 ACCESS_TEAM_DOMAIN=example.cloudflareaccess.com
 ACCESS_AUDIENCE=replace-with-access-application-audience

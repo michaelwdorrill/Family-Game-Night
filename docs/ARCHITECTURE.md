@@ -18,7 +18,7 @@ Every stored game carries `game_type` and `state_schema_version`. The MVP will r
 
 ## State and concurrency boundary
 
-Internal state, deck order, all hands, and random state stay inside the Worker/D1 boundary. The engine returns a new state rather than mutating its input. In Milestone 2, each mutation will require a caller-generated command ID and expected game version. A conditional snapshot update and the matching public event will be written atomically, making exact retries idempotent and stale concurrent submissions safe.
+Internal state, deck order, all hands, and random state stay inside the Worker/D1 boundary. The engine returns a new state rather than mutating its input. Every mutation requires a caller-generated command ID and expected game version. The Worker writes a conditional snapshot update and exactly one version-matched public event in a D1 batch, making exact retries idempotent and stale concurrent submissions safe.
 
 ## Randomness
 
@@ -26,4 +26,8 @@ Production shuffles and dealer selection use Web Crypto through an injectable ra
 
 ## Deployment boundary
 
-The checked-in workflows are gated and cannot complete until the owner supplies a real domain, D1 database ID, Worker route, Access configuration, and narrowly scoped GitHub secrets. Those manual steps are documented separately; placeholders are not production configuration.
+The checked-in workflows are gated and cannot complete until the owner supplies a real domain, D1 database IDs, Worker routes, Access configuration, and narrowly scoped GitHub secrets. Staging and production use different Worker environments and D1 bindings. Those manual steps are documented separately; placeholders are not production configuration.
+
+## Browser security boundary
+
+The production Vite build injects a restrictive CSP meta policy with same-origin scripts, styles, connections, and fonts; no third-party scripts are loaded. The API adds `no-store`, CSP, frame, MIME-sniffing, referrer, and permissions headers to every response. Because `frame-ancestors` is not enforced from a meta policy and GitHub Pages cannot configure arbitrary response headers, the static hostname must also receive the documented Cloudflare response-header transform before launch.

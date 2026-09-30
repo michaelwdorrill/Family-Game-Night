@@ -9,6 +9,7 @@
 7. Keep Vite's production base at `/`; routes use `HashRouter`, so game links have the form `/#/games/<id>`.
 8. Review and manually run the Pages workflow. It installs from the exact lockfile, runs the quality gate, and uploads only `apps/web/dist`.
 9. Configure the Cloudflare Worker route for `hostname/api/*`; verify the static origin never handles API paths.
-10. After both deployments, test the home page, a hash-route refresh, static assets, `/api/v1/health`, and Access login/logout.
+10. Add the Cloudflare static response-header rule from `docs/CLOUDFLARE_SETUP.md`; GitHub Pages does not provide the required custom security headers itself.
+11. After both deployments, test the home page, a hash-route refresh, static assets, `/api/v1/health`, Access login/logout, and the effective document/API response headers.
 
-The deployment workflow is intentionally manual until the real repository, custom domain, and protected GitHub environment are configured and reviewed.
+The deployment workflow is intentionally manual until the real repository, custom domain, and protected GitHub environment are configured and reviewed. Because a repository has one Pages site, decide whether that site will be temporarily bound to a prelaunch staging hostname or whether a separate staging static origin will be supplied; never let the staging frontend call production D1.

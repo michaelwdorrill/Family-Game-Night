@@ -12,6 +12,19 @@ database_name = "family-game-night"
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "../../migrations"
 
+[env.staging]
+name = "family-game-night-api-staging"
+workers_dev = false
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "family-game-night-staging"
+database_id = "11111111-1111-1111-1111-111111111111"
+migrations_dir = "../../migrations"
+
 [env.production]
 name = "family-game-night-api"
 workers_dev = false

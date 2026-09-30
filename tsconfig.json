@@ -1,4 +1,9 @@
 {
-  "files": [],
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": ["node", "@playwright/test"]
+  },
+  "include": ["playwright.config.ts"],
   "references": [{ "path": "./packages/shared" }, { "path": "./packages/sequence-engine" }]
 }
