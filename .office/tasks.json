@@ -1,0 +1,92 @@
+{
+  "milestones": [
+    {
+      "id": "M1",
+      "title": "Establish the reviewed project baseline",
+      "detail": "Mei owns this milestone; Uriel reviews the existing game work. Complete when the approved records and reviewed sequence-wip work are merged through pull requests into the chosen Family-Game-Night repository, startup is retested, and remaining release gaps have owners. Preserve the Sequence working copy until its work is safely merged."
+    },
+    {
+      "id": "M2",
+      "title": "Prove game quality and saved-game reliability",
+      "detail": "Depends on M1. Mei resolves defects and Uriel independently verifies the release requirements. Complete when rules, invitations, teams, privacy, saved progress, phone and desktop use, accessibility, and dependency security checks pass with recorded evidence."
+    },
+    {
+      "id": "M3",
+      "title": "Prepare private family testing",
+      "detail": "Depends on M2. Mei prepares hosting and restricted family sign-in; Uriel verifies the hosted experience. Complete when approved family accounts can use the release candidate across devices, unauthorized access is rejected, and recovery and rollback instructions are ready."
+    },
+    {
+      "id": "M4",
+      "title": "Complete family trials and pass the release gate",
+      "detail": "Depends on M3. Family participants complete two-team and three-team games over multiple days on phones and computers. Uriel records the results and Mei owns the release decision. Complete only after the approved requirements pass, saved games need no manual repair, and the released version passes a final hosted check."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Reconcile approved records and repository state",
+      "milestone": "M1",
+      "detail": "Owner: Mei. Read the approved records from origin/office/onboarding-records and verify pull request #1 before merging through review. The current home checkout has no local HEAD commit, while the records are available in its remote-tracking branch. Establish the usable home checkout without replacing existing work or changing the owner's chosen repository."
+    },
+    {
+      "id": "T2",
+      "title": "Review the existing game against the charter",
+      "milestone": "M1",
+      "detail": "Owner: Uriel; Mei supplies the review scope. Review sequence-wip, its specification, tests, and implementation against the release contract. Treat previously reported features as built but awaiting verification. Return findings with severity, reproduction steps, and the requirement affected; exclude deferred features."
+    },
+    {
+      "id": "T3",
+      "title": "Retest startup and merge reviewed game work",
+      "milestone": "M1",
+      "detail": "Owner: Mei; reviewer: Uriel. Reproduce the normal startup and browser launch, confirming that the previously reported origin-setting fix works without opening credential or login files. Resolve review blockers, run the existing automated checks and production build, and merge sequence-wip through a reviewed pull request. Keep the Sequence folder until the merge and preservation of its work are verified."
+    },
+    {
+      "id": "T4",
+      "title": "Publish the delivery forecast and blocker list",
+      "milestone": "M1",
+      "detail": "Owner: Mei. After T2 and T3, estimate remaining effort from actual findings and identify hosting and family-testing dependencies. Include several calendar days for asynchronous trials; do not promise a release date before availability is known. Update the forecast at each milestone and route only unresolved owner choices, spending, account actions, or participation needs."
+    },
+    {
+      "id": "T5",
+      "title": "Verify rules, teams, invitations, and multiple games",
+      "milestone": "M2",
+      "detail": "Owner: Uriel; fixes: Mei. Verify two-team and three-team play, equal teams, invitation management, concurrent games, Jacks, dead-card exchanges, protected sequences, and winning conditions against the specification. Confirm illegal actions are rejected and record meaningful automated and manual coverage."
+    },
+    {
+      "id": "T6",
+      "title": "Verify private hands and durable progress",
+      "milestone": "M2",
+      "detail": "Owner: Uriel; fixes: Mei. Test access boundaries, private hands, repeated clicks, simultaneous requests, outdated tabs, refreshes, device changes, and long breaks. Confirm games remain consistent and resumable without manual repair. Add targeted regression coverage for defects found."
+    },
+    {
+      "id": "T7",
+      "title": "Complete accessibility and dependency checks",
+      "milestone": "M2",
+      "detail": "Owner: Uriel; fixes: Mei. Perform manual keyboard, focus, labeling, and phone-layout checks alongside existing automated checks. Run the outstanding dependency vulnerability audit in an environment that supports it and assess findings. Recheck fixes and hold the milestone open for unresolved security, accessibility, or saved-game reliability failures."
+    },
+    {
+      "id": "T8",
+      "title": "Prepare hosting and restricted family sign-in",
+      "milestone": "M3",
+      "detail": "Owner: Mei; verification: Uriel. Review existing hosting configuration, document required setup, and prepare the hosted release candidate using approved services. Verify approved-account sign-in, invitations, sign-out, and rejection of unauthorized accounts. Never read credential or login files; route any necessary account-holder setup as a precise owner action only when it is required."
+    },
+    {
+      "id": "T9",
+      "title": "Verify hosted readiness and recovery",
+      "milestone": "M3",
+      "detail": "Owner: Uriel; fixes and recovery instructions: Mei. Repeat critical game and persistence checks against the hosted candidate on phones and computers. Document how to restore service or roll back a failed release while preserving saved games. Record the exact candidate version and resolve hosted-only failures before family trials."
+    },
+    {
+      "id": "T10",
+      "title": "Run complete family games over multiple days",
+      "milestone": "M4",
+      "detail": "Owner: Mei coordinates participation; Uriel records evidence. Arrange real approved family accounts to complete at least one two-team game and one three-team game across phones and computers. Include breaks, refreshes, and device changes. Record completion and any defects; repair and repeat affected scenarios if required."
+    },
+    {
+      "id": "T11",
+      "title": "Apply the release gate and verify the release",
+      "milestone": "M4",
+      "detail": "Owner: Mei; independent recommendation: Uriel. Check every release-contract requirement against evidence from the reviewed release candidate. Require passing automated checks, accessibility and dependency review, restricted sign-in, and completed family trials with no manual saved-game repair. Resolve blockers before release, verify the released version, and record the release result and deferred scope."
+    }
+  ]
+}
