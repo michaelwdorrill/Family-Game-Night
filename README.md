@@ -2,6 +2,8 @@
 
 Family Game Night is a private, asynchronous collection of family games. The first game is the original-styled **Card Lines**, a Sequence-style card-and-chip game.
 
+For the current cross-branch progress, remaining release tasks, and planned workspace reorganization, read the [review handoff](.office/handoffs/2026-11-06-reorganization.md). The later game implementation is on `sequence-wip` and still needs review and merging into this home repository.
+
 This repository currently contains the Milestone 0 deployment skeleton and the pure Milestone 1 rules engine. Authentication, persistence-backed commands, lobby UI, and the full game UI deliberately begin in later milestones.
 
 ## Requirements
