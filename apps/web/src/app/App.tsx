@@ -6,8 +6,9 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { Component, useState } from 'react';
-import { HashRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
+import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
+import { FamilyHub } from '../features/family/FamilyHub';
 import { ApiClientError, getMe, queryKeys, updateMe } from '../api/client';
 import { CreateGamePage } from '../features/dashboard/CreateGamePage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
@@ -71,7 +72,7 @@ function SessionError({ error }: { readonly error: Error }) {
         {expired ? 'Sign in again to continue with the same family account.' : error.message}
       </p>
       <div className="button-row">
-        <a className="button primary" href="/">
+        <a className="button primary" href={window.location.href}>
           Try again
         </a>
         {expired ? (
@@ -130,7 +131,7 @@ function DisplayNameGate({ profile }: { readonly profile: UserProfileDto }) {
 function AppHeader({ profile }: { readonly profile: UserProfileDto }) {
   return (
     <header className="app-header">
-      <Link className="brand" to="/">
+      <Link className="brand" to="/classic">
         <span aria-hidden="true">♠</span>
         <span>Family Game Night</span>
       </Link>
@@ -151,10 +152,10 @@ function AuthenticatedApp() {
     <>
       <AppHeader profile={me.data} />
       <Routes>
-        <Route element={<DashboardPage />} path="/" />
+        <Route element={<DashboardPage />} path="/classic" />
         <Route element={<CreateGamePage />} path="/games/new" />
         <Route element={<GamePage />} path="/games/:gameId" />
-        <Route element={<Navigate replace to="/" />} path="*" />
+        <Route element={<Navigate replace to="/classic" />} path="*" />
       </Routes>
     </>
   );
@@ -173,13 +174,22 @@ function makeQueryClient(): QueryClient {
   });
 }
 
+function Entry() {
+  const { pathname } = useLocation();
+  return pathname === '/classic' || pathname.startsWith('/games/') ? (
+    <AuthenticatedApp />
+  ) : (
+    <FamilyHub />
+  );
+}
+
 export function App() {
   const [queryClient] = useState(makeQueryClient);
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
         <AppFailureBoundary>
-          <AuthenticatedApp />
+          <Entry />
         </AppFailureBoundary>
       </HashRouter>
     </QueryClientProvider>

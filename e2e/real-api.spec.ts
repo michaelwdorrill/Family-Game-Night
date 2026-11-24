@@ -121,7 +121,7 @@ test('two browsers complete a private D1-backed turn and resume the latest state
 
   try {
     const hostCapture = await installRealApi(page, app, harness.db, HOST_EMAIL);
-    await page.goto('/');
+    await page.goto('/#/classic');
     await confirmDisplayName(page, 'Host Player');
 
     await page.getByRole('link', { name: 'Create game' }).click();
@@ -139,7 +139,7 @@ test('two browsers complete a private D1-backed turn and resume the latest state
 
     const memberPage = await context.newPage();
     const memberCapture = await installRealApi(memberPage, app, harness.db, MEMBER_EMAIL);
-    await memberPage.goto('/');
+    await memberPage.goto('/#/classic');
     await confirmDisplayName(memberPage, 'Member Player');
     await expect(memberPage.getByText('Real D1 Browser Table')).toBeVisible();
     await memberPage.getByRole('button', { name: 'Accept' }).click();

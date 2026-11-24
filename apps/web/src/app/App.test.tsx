@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
 
@@ -41,6 +41,9 @@ function dashboardFetch(needsDisplayNameConfirmation = false, finished: GameSumm
   });
 }
 
+beforeEach(() => {
+  window.location.hash = '#/classic';
+});
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();

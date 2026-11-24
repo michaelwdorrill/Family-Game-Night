@@ -1,5 +1,7 @@
 # Family Game Night implementation plan
 
+The milestones below describe the original Card Lines release. The browser multiplayer work, ten-phase game, family-link access, and Cloudflare turn timers are described in [Family tables](FAMILY_TABLES.md).
+
 This plan translates the authoritative Sequence-style MVP specification into reviewable milestones. The `Sequence` directory is the repository root for this greenfield implementation. The public working title remains **Card Lines**; the internal game identifier is `sequence`.
 
 ## Milestone 0 — Scaffold and deployment skeleton

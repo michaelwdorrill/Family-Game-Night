@@ -132,8 +132,12 @@ export async function createD1Harness(): Promise<HarnessResult> {
     new URL('0002_profile_confirmation.sql', migrationDirectory),
     'utf8',
   );
+  const familyMigration = await readFile(
+    new URL('0003_family_tables.sql', migrationDirectory),
+    'utf8',
+  );
   try {
-    for (const migration of [firstMigration, secondMigration]) {
+    for (const migration of [firstMigration, secondMigration, familyMigration]) {
       const statements = migration
         .split(';')
         .map((statement) => statement.trim())

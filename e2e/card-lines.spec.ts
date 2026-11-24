@@ -218,7 +218,7 @@ async function expectNoAccessibilityViolations(page: Page): Promise<void> {
 
 test('creates a lobby through the real browser UI', async ({ page }) => {
   await installBaseApi(page, lobby());
-  await page.goto('/');
+  await page.goto('/#/classic');
 
   await expect(
     page.getByRole('heading', { name: 'Game night, whenever you’re ready.' }),

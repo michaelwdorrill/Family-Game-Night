@@ -4,6 +4,12 @@ import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
 import './styles.css';
 
+import { rememberFamilyLink } from './features/family/api';
+rememberFamilyLink();
+window.addEventListener('hashchange', () => {
+  if (rememberFamilyLink()) window.location.reload();
+});
+
 const root = document.querySelector('#root');
 
 if (root === null) {

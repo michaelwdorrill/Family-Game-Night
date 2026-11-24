@@ -1,8 +1,8 @@
 # Family Game Night
 
-Family Game Night is a private, asynchronous collection of family games. The first game is the original-styled **Card Lines**, a Sequence-style card-and-chip game.
+Family Game Night is a link-only, asynchronous game hub. Family members choose their name and play Card Lines, partnership Euchre, Phase Rummy (the ten-phase game), or Lantern Rummy. Mexican Train Dominoes is waiting for the family ruleset.
 
-This repository contains the pure Card Lines rules engine, authenticated D1-backed command API, dashboard, lobby, responsive game interface, and desktop/mobile browser suite. The remaining pre-launch work is manual accessibility/security verification and owner-controlled Cloudflare/GitHub staging and production setup.
+Hosts can open a table to everyone or invite selected players, choose whether a full table starts automatically, and set a turn timer. A Cloudflare Worker plays a random legal turn when time expires. Open the [family hub guide](docs/FAMILY_TABLES.md) for game rules, local play and Cloudflare deployment.
 
 ## Requirements
 
@@ -19,7 +19,7 @@ Copy-Item .dev.vars.example apps\worker\.dev.vars
 
 The launcher creates repository-local Corepack shims without Administrator access, verifies the exact lockfile, applies local D1 migrations, and starts both services. If the shims are already on `PATH`, `pnpm dev` starts the same services without reinstalling or migrating.
 
-The web app runs at `http://127.0.0.1:5173` and proxies `/api/*` to the Worker at `http://127.0.0.1:8787`. Local authenticated requests use only the development email in `apps/worker/.dev.vars`; hosted environments reject that bypass. Keep `APP_ORIGIN` exactly equal to the URL in the browser, including `127.0.0.1` versus `localhost` and the port.
+With the example local configuration, open `http://127.0.0.1:5173/#/?family=local-family-preview`. Vite proxies the API to the Worker on port 8787. Keep `APP_ORIGIN` equal to the browser origin. Earlier Access-backed Card Lines games use `/#/classic`.
 
 ## Try Euchre and Lantern Rummy locally
 

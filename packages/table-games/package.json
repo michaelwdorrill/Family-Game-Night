@@ -11,6 +11,10 @@
     "./lantern-rummy": {
       "types": "./src/lantern-rummy.ts",
       "import": "./src/lantern-rummy.ts"
+    },
+    "./phase-rummy": {
+      "types": "./src/phase-rummy.ts",
+      "import": "./src/phase-rummy.ts"
     }
   },
   "scripts": {
