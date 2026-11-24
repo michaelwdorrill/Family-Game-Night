@@ -424,7 +424,7 @@ export function GamePage() {
           {query.data.kind === 'lobby' ? (
             <LobbyPanel game={query.data} key={`${query.data.id}:${String(query.data.version)}`} />
           ) : (
-            <CardLinesGame game={query.data} />
+            <CardLinesGame game={query.data} key={query.data.id} />
           )}
         </>
       ) : null}

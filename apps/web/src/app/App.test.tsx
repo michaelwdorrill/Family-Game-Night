@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from './App';
 
+import type { GameSummaryDto } from '@family-game-night/shared';
+
 const USER_ID = '00000000-0000-4000-8000-000000000001';
 const PLAYER_ID = '00000000-0000-4000-8000-000000000002';
 const GAME_ID = '00000000-0000-4000-8000-000000000003';
@@ -11,7 +13,7 @@ function json(body: unknown, status = 200): Response {
   return Response.json(body, { status });
 }
 
-function dashboardFetch(needsDisplayNameConfirmation = false) {
+function dashboardFetch(needsDisplayNameConfirmation = false, finished: GameSummaryDto[] = []) {
   return vi.fn<typeof fetch>((input) => {
     const path = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     if (path === '/api/v1/me') {
@@ -26,7 +28,9 @@ function dashboardFetch(needsDisplayNameConfirmation = false) {
       );
     }
     if (path.startsWith('/api/v1/games?')) {
-      return Promise.resolve(json({ games: [], nextCursor: null }));
+      return Promise.resolve(
+        json({ games: path.includes('bucket=finished') ? finished : [], nextCursor: null }),
+      );
     }
     if (path === '/api/v1/invitations') {
       return Promise.resolve(json({ invitations: [] }));
@@ -55,6 +59,40 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Invitations' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Waiting on others' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Finished games' })).toBeInTheDocument();
+  });
+
+  it('shows outcomes for finished and cancelled games on the dashboard', async () => {
+    const game: GameSummaryDto = {
+      id: GAME_ID,
+      title: 'Last game',
+      gameType: 'sequence',
+      status: 'finished',
+      version: 15,
+      updatedAt: '2026-11-24T12:00:00Z',
+      currentPlayerId: null,
+      currentPlayerDisplayName: null,
+      myTeamIndex: 0,
+      sequenceCounts: [0, 2],
+      winnerTeamIndex: 1,
+      action: 'view',
+    };
+    vi.stubGlobal(
+      'fetch',
+      dashboardFetch(false, [
+        game,
+        {
+          ...game,
+          id: PLAYER_ID,
+          title: 'Another table',
+          status: 'cancelled',
+          winnerTeamIndex: null,
+        },
+      ]),
+    );
+    render(<App />);
+    expect(await screen.findByText('Teal team won')).toBeInTheDocument();
+    expect(screen.getByText('Game cancelled')).toBeInTheDocument();
+    expect(screen.queryByText(/Current turn:/)).not.toBeInTheDocument();
   });
 
   it('requires first-time users to confirm a display name', async () => {

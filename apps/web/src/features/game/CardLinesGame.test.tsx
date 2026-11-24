@@ -113,6 +113,23 @@ describe('CardLinesGame', () => {
     expect(cells[1]).toHaveFocus();
   });
 
+  it('clears the pending play when another client cancels the game', () => {
+    const client = new QueryClient();
+    const view = (value: SequenceGameViewDto) => (
+      <QueryClientProvider client={client}>
+        <CardLinesGame game={value} />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(view(game()));
+    fireEvent.click(screen.getByRole('button', { name: /A of spades/i }));
+    fireEvent.click(screen.getByRole('gridcell', { name: /legal target/i }));
+    expect(screen.getByRole('button', { name: 'Confirm move' })).toBeInTheDocument();
+    rerender(view(game({ status: 'cancelled', version: 6, currentPlayerId: null })));
+    expect(screen.getByText('Game cancelled')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Confirm move' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Waiting on/)).not.toBeInTheDocument();
+  });
+
   it('previews and explicitly confirms a legal card play', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(Response.json(game({ version: 6 })));
     vi.stubGlobal('fetch', fetchMock);
