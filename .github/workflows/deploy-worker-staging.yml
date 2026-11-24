@@ -26,13 +26,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
-      - name: Refuse placeholder staging D1 configuration
-        shell: bash
-        run: |
-          if grep -q '11111111-1111-1111-1111-111111111111' apps/worker/wrangler.toml; then
-            echo 'Replace the placeholder staging D1 database ID before deployment.' >&2
-            exit 1
-          fi
+      - name: Validate staging D1 binding
+        run: python3 scripts/check-deploy-binding.py staging
       - name: Apply staging migrations
         run: pnpm --filter @family-game-night/worker db:migrate:staging
         env:

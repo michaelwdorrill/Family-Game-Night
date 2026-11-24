@@ -26,13 +26,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
-      - name: Refuse placeholder D1 configuration
-        shell: bash
-        run: |
-          if grep -q '00000000-0000-0000-0000-000000000000' apps/worker/wrangler.toml; then
-            echo 'Replace the placeholder D1 database ID before production deployment.' >&2
-            exit 1
-          fi
+      - name: Validate production D1 binding
+        run: python3 scripts/check-deploy-binding.py production
       - name: Deploy Worker
         run: pnpm --filter @family-game-night/worker deploy
         env:
