@@ -1,0 +1,22 @@
+{
+  "name": "@family-game-night/table-games",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./euchre": {
+      "types": "./src/euchre.ts",
+      "import": "./src/euchre.ts"
+    },
+    "./lantern-rummy": {
+      "types": "./src/lantern-rummy.ts",
+      "import": "./src/lantern-rummy.ts"
+    }
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

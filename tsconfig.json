@@ -5,5 +5,15 @@
     "types": ["node", "@playwright/test"]
   },
   "include": ["playwright.config.ts"],
-  "references": [{ "path": "./packages/shared" }, { "path": "./packages/sequence-engine" }]
+  "references": [
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/sequence-engine"
+    },
+    {
+      "path": "./packages/table-games"
+    }
+  ]
 }
