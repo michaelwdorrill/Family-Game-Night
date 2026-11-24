@@ -6,7 +6,7 @@ This repository contains the pure Card Lines rules engine, authenticated D1-back
 
 ## Requirements
 
-- Node.js 24.13.0 or newer in the Node 24 line
+- Node.js 24.15.0 or newer in the Node 24 line (CI uses the version in `.node-version`)
 - pnpm 11.25.0 (pinned through the `packageManager` field)
 
 ## Start locally
