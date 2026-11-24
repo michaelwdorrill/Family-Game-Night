@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { getGameList, getInvitations, queryKeys, respondToInvitation } from '../../api/client';
 
+import { gameOutcome, teamNames } from '../game/gameOutcome';
+
 import type { DashboardBucket, GameSummaryDto, InvitationDto } from '@family-game-night/shared';
 
 const visiblePollingInterval = () => (document.visibilityState === 'visible' ? 60_000 : false);
-const teamNames = ['Gold', 'Teal', 'Coral'] as const;
 
 function scoreLabel(game: GameSummaryDto): string {
   if (game.sequenceCounts.length === 0) return 'Teams not set';
@@ -22,7 +23,10 @@ function GameCard({ game }: { readonly game: GameSummaryDto }) {
       <div>
         <p className="card-kicker">Card Lines</p>
         <h3>{game.title}</h3>
-        <p>{game.status === 'lobby' ? 'Lobby in progress' : `Current turn: ${currentPlayer}`}</p>
+        <p>
+          {gameOutcome(game) ??
+            (game.status === 'lobby' ? 'Lobby in progress' : `Current turn: ${currentPlayer}`)}
+        </p>
         {game.myTeamIndex === null ? null : (
           <p className="my-team">
             <span aria-hidden="true" className={`mini-chip team-${String(game.myTeamIndex)}`} />

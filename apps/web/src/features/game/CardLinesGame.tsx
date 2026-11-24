@@ -10,6 +10,8 @@ import {
   queryKeys,
 } from '../../api/client';
 
+import { gameOutcome, teamNames } from './gameOutcome';
+
 import type {
   PublicGameEventDto,
   SequenceCardDto,
@@ -24,8 +26,6 @@ interface PendingPlay {
   readonly expectedVersion: number;
   readonly targetCell: number;
 }
-
-const teamNames = ['Gold', 'Teal', 'Coral'] as const;
 
 function suitSymbol(suit: string): string {
   switch (suit) {
@@ -317,7 +317,7 @@ function readableEvent(event: PublicGameEventDto): string {
 export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) {
   const queryClient = useQueryClient();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [pending, setPending] = useState<PendingPlay | null>(null);
+  const [preview, setPreview] = useState<PendingPlay | null>(null);
   const [alternatives, setAlternatives] = useState<readonly (readonly string[])[] | null>(null);
   const [previewAlternative, setPreviewAlternative] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -326,12 +326,14 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
   const legalTargets = useMemo(() => new Set(selectedCard?.legalTargetCells ?? []), [selectedCard]);
   const isMyTurn = game.status === 'active' && game.currentPlayerId === game.myUserId;
 
+  const pending = isMyTurn && preview?.expectedVersion === game.version ? preview : null;
+
   const command = useMutation({
     mutationFn: (request: SequenceCommandRequest) => applySequenceCommand(game.id, request),
     onSuccess: async (next, request) => {
       queryClient.setQueryData(queryKeys.game(game.id), next);
       setSelectedCardId(null);
-      setPending(null);
+      setPreview(null);
       setAlternatives(null);
       setPreviewAlternative(null);
       setAnnouncement(
@@ -351,7 +353,7 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
         if (latest.success) queryClient.setQueryData(queryKeys.game(game.id), latest.data);
         else void queryClient.invalidateQueries({ queryKey: queryKeys.game(game.id) });
         setSelectedCardId(null);
-        setPending(null);
+        setPreview(null);
         setAnnouncement('The game changed; refreshed to the latest turn.');
       }
     },
@@ -387,7 +389,7 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
   };
   const current = game.players.find((player) => player.userId === game.currentPlayerId);
   const selectionCells =
-    previewAlternative === null || alternatives === null
+    pending === null || previewAlternative === null || alternatives === null
       ? new Set<number>()
       : sequenceCells(alternatives[previewAlternative] ?? []);
 
@@ -400,11 +402,8 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
         <div>
           <span className="step-label">Turn {game.turnNumber}</span>
           <strong>
-            {game.status === 'finished'
-              ? `${teamNames[game.winnerTeamIndex ?? 0]} team won`
-              : isMyTurn
-                ? 'Your turn'
-                : `Waiting on ${current?.displayName ?? 'another player'}`}
+            {gameOutcome(game) ??
+              (isMyTurn ? 'Your turn' : `Waiting on ${current?.displayName ?? 'another player'}`)}
           </strong>
         </div>
         <div className="score-chips">
@@ -420,14 +419,16 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
         <Board
           game={game}
           legalTargets={legalTargets}
-          onTarget={(targetCell) =>
-            setPending({
+          onTarget={(targetCell) => {
+            setAlternatives(null);
+            setPreviewAlternative(null);
+            setPreview({
               cardId: selectedCardId ?? '',
               targetCell,
               commandId: crypto.randomUUID(),
               expectedVersion: game.version,
-            })
-          }
+            });
+          }}
           previewCell={pending?.targetCell ?? null}
           selectionCells={selectionCells}
           targetAction={selectedCard?.kind === 'one-eyed-jack' ? 'remove' : 'place'}
@@ -499,7 +500,7 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
         <div className="hand-heading">
           <div>
             <p className="step-label">Your cards</p>
-            <h2 id="hand-heading">Choose a card</h2>
+            <h2 id="hand-heading">{isMyTurn ? 'Choose a card' : 'Your hand'}</h2>
           </div>
           {game.deadCardExchangeUsed ? <span>Exchange used this turn</span> : null}
         </div>
@@ -511,13 +512,13 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
               key={card.id}
               onSelect={() => {
                 setSelectedCardId(card.id);
-                setPending(null);
+                setPreview(null);
               }}
               selected={selectedCardId === card.id}
             />
           ))}
         </ul>
-        {selectedCard?.isDead && !game.deadCardExchangeUsed ? (
+        {isMyTurn && selectedCard?.isDead && !game.deadCardExchangeUsed ? (
           <button
             className="button secondary"
             disabled={command.isPending}
@@ -568,7 +569,7 @@ export function CardLinesGame({ game }: { readonly game: SequenceGameViewDto }) 
             >
               {command.isPending ? 'Playing…' : 'Confirm move'}
             </button>
-            <button className="button quiet" onClick={() => setPending(null)} type="button">
+            <button className="button quiet" onClick={() => setPreview(null)} type="button">
               Cancel
             </button>
           </div>
