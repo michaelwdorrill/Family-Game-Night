@@ -14,26 +14,38 @@ migrations_dir = "../../migrations"
 
 [env.staging]
 name = "family-game-night-api-staging"
-workers_dev = false
+workers_dev = true
 
 [env.staging.vars]
 ENVIRONMENT = "staging"
+APP_ORIGIN = "https://family-game-night-api-staging.homebase-app.workers.dev"
 
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "family-game-night-staging"
-database_id = "11111111-1111-1111-1111-111111111111"
+database_id = "62c3a4cc-421c-4e7c-9d47-777e67a6bf1a"
 migrations_dir = "../../migrations"
 
 [env.production]
 name = "family-game-night-api"
 workers_dev = false
+routes = [{ pattern = "familygamenight.website", custom_domain = true }]
 
 [env.production.vars]
 ENVIRONMENT = "production"
+APP_ORIGIN = "https://familygamenight.website"
 
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "family-game-night"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "0686bd2d-23c7-47a5-8d2f-816f6e7e4234"
 migrations_dir = "../../migrations"
+
+[triggers]
+crons = ["* * * * *"]
+
+[env.staging.triggers]
+crons = ["* * * * *"]
+
+[env.production.triggers]
+crons = ["* * * * *"]

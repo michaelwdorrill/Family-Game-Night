@@ -123,7 +123,7 @@ function LobbyPanel({ game }: { readonly game: LobbyViewDto }) {
       }),
     onSuccess: async () => {
       await refreshDashboard();
-      void navigate('/');
+      void navigate('/classic');
     },
     onError: recoverStale,
   });
@@ -397,7 +397,7 @@ export function GamePage() {
   });
   return (
     <main className="app-page">
-      <Link className="back-link" to="/">
+      <Link className="back-link" to="/classic">
         ← Dashboard
       </Link>
       {query.isPending ? <p className="empty-card">Opening game…</p> : null}

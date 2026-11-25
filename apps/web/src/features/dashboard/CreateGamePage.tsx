@@ -26,7 +26,7 @@ export function CreateGamePage() {
   }
   return (
     <main className="app-page narrow-page">
-      <Link className="back-link" to="/">
+      <Link className="back-link" to="/classic">
         ← Dashboard
       </Link>
       <p className="eyebrow">New family game</p>
@@ -87,7 +87,7 @@ export function CreateGamePage() {
           <button className="button primary" disabled={mutation.isPending} type="submit">
             {mutation.isPending ? 'Creating…' : 'Create lobby'}
           </button>
-          <Link className="button quiet" to="/">
+          <Link className="button quiet" to="/classic">
             Cancel
           </Link>
         </div>

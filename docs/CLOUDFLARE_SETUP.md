@@ -1,4 +1,6 @@
-# Cloudflare setup
+# Cloudflare setup for the legacy Access deployment
+
+For the current family hub, follow [Family tables](FAMILY_TABLES.md#cloudflare-deployment).
 
 No Cloudflare resource is created automatically by the repository. Complete these steps with an account that controls the intended hostname. Use separate staging and production resources; staging is where migrations, Access policy, routing, and a complete two-user game are proven before production changes.
 

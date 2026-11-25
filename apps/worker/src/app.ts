@@ -35,7 +35,8 @@ import type { HealthResponse, UserProfileDto } from '@family-game-night/shared';
 import type { RandomSource } from '@family-game-night/sequence-engine';
 import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import type { ZodError, ZodType } from 'zod';
+import { parseJson, validationError, requireSafeMutation } from './request';
+import { familyRoutes } from './family/routes';
 import type { WorkerEnvironment } from './env';
 
 export interface WorkerAppDependencies {
@@ -46,7 +47,6 @@ export interface WorkerAppDependencies {
 }
 
 const API_PREFIX = '/api/v1';
-const MAX_JSON_BYTES = 32 * 1024;
 
 function apiJson<T>(
   context: Context<WorkerEnvironment>,
@@ -54,29 +54,6 @@ function apiJson<T>(
   status: ContentfulStatusCode = 200,
 ): Response {
   return context.json(value, status, { 'Cache-Control': 'no-store' });
-}
-
-function validationError(error: ZodError): ApiError {
-  return new ApiError(400, 'INVALID_REQUEST', 'The request did not match the API contract.', {
-    issues: error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })),
-  });
-}
-
-async function parseJson<T>(context: Context<WorkerEnvironment>, schema: ZodType<T>): Promise<T> {
-  let value: unknown;
-  try {
-    const body = await context.req.arrayBuffer();
-    if (body.byteLength > MAX_JSON_BYTES) {
-      throw new ApiError(413, 'REQUEST_TOO_LARGE', 'The request body is too large.');
-    }
-    value = JSON.parse(new TextDecoder().decode(body)) as unknown;
-  } catch (error) {
-    if (error instanceof ApiError) throw error;
-    throw new ApiError(400, 'INVALID_JSON', 'The request body must contain valid JSON.');
-  }
-  const result = schema.safeParse(value);
-  if (!result.success) throw validationError(result.error);
-  return result.data;
 }
 
 function parseGameId(context: Context<WorkerEnvironment>): string {
@@ -93,29 +70,6 @@ function parseInvitationId(context: Context<WorkerEnvironment>): string {
 
 function isMutation(method: string): boolean {
   return method === 'POST' || method === 'PATCH' || method === 'PUT' || method === 'DELETE';
-}
-
-function requireSafeMutation(input: {
-  readonly appOrigin: string;
-  readonly contentLength: string | undefined;
-  readonly contentType: string | undefined;
-  readonly origin: string | undefined;
-}): void {
-  const contentType = input.contentType?.split(';', 1)[0]?.trim().toLowerCase();
-  if (contentType !== 'application/json') {
-    throw new ApiError(
-      415,
-      'UNSUPPORTED_MEDIA_TYPE',
-      'Mutations require Content-Type: application/json.',
-    );
-  }
-  const contentLength = Number(input.contentLength ?? '0');
-  if (Number.isFinite(contentLength) && contentLength > MAX_JSON_BYTES) {
-    throw new ApiError(413, 'REQUEST_TOO_LARGE', 'The request body is too large.');
-  }
-  if (input.origin !== input.appOrigin) {
-    throw new ApiError(403, 'INVALID_ORIGIN', 'The request origin is not allowed.');
-  }
 }
 
 function authenticatedUser(context: Context<WorkerEnvironment>): UserProfileDto {
@@ -197,6 +151,8 @@ export function createApp(dependencies: WorkerAppDependencies = {}): Hono<Worker
       );
     }
   });
+
+  app.route('/api/family', familyRoutes({ random, now: () => now().getTime() }, createId));
 
   app.get(`${API_PREFIX}/health`, (context) => {
     const response: HealthResponse = { ok: true, service: 'family-game-night-api' };
