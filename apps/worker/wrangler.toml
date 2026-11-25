@@ -29,9 +29,11 @@ migrations_dir = "../../migrations"
 [env.production]
 name = "family-game-night-api"
 workers_dev = false
+routes = [{ pattern = "familygamenight.website", custom_domain = true }]
 
 [env.production.vars]
 ENVIRONMENT = "production"
+APP_ORIGIN = "https://familygamenight.website"
 
 [[env.production.d1_databases]]
 binding = "DB"
