@@ -41,6 +41,10 @@ Sets share a number. Runs use consecutive numbers from 1 to 12 in any colors. A 
 
 Leftover cards add penalty points. Numbers 1–9 count five, 10–12 count ten, skips count fifteen, and wilds count twenty-five. Completing phase ten wins at the end of the round. Among simultaneous finishers, the lowest total wins. Tied finalists replay phase ten. If the stock runs out, shuffle buried discards to replenish it. If no draw is possible, score the round.
 
+## Restore the staging roster
+
+In the project checkout, run `Use-CF homebase` in local PowerShell and then `node scripts/sync-staging-roster.mjs`. The command syncs Bitwarden and reads the staging roster Login. Its username is `FAMILY_ROSTER_JSON` and its password holds the JSON array. It checks the names, sets the encrypted Worker secret through the Cloudflare API, and compares the public staging roster to the vault entry before reporting success. It prints only the count and URL.
+
 ## Cloudflare deployment
 
 Use a separate staging D1 database and hostname to test the family hub. The Worker serves the Vite build through Workers Static Assets and handles `/api/family/*` on the same origin. The existing Access-backed Card Lines API and old game links still work when their original configuration is supplied. Earlier email-account games remain under `/#/classic`.
