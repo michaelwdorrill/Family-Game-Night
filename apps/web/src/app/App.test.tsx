@@ -21,7 +21,7 @@ function dashboardFetch(needsDisplayNameConfirmation = false, finished: GameSumm
         json({
           id: USER_ID,
           email: 'host@example.test',
-          displayName: 'Michael',
+          displayName: 'TestPlayerA',
           role: 'admin',
           needsDisplayNameConfirmation,
         }),
@@ -105,7 +105,7 @@ describe('App', () => {
     expect(
       await screen.findByRole('heading', { name: 'What should the family call you?' }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText('Display name')).toHaveValue('Michael');
+    expect(screen.getByLabelText('Display name')).toHaveValue('TestPlayerA');
   });
 
   it('shows a focused recovery message for an expired Access session', async () => {
@@ -158,7 +158,7 @@ describe('App', () => {
       members: [
         {
           userId: USER_ID,
-          displayName: 'Michael',
+          displayName: 'TestPlayerA',
           membershipStatus: 'accepted',
           teamIndex: null,
           seatIndex: null,
@@ -190,7 +190,7 @@ describe('App', () => {
           json({
             id: USER_ID,
             email: 'host@example.test',
-            displayName: 'Michael',
+            displayName: 'TestPlayerA',
             role: 'admin',
             needsDisplayNameConfirmation: false,
           }),
@@ -218,10 +218,10 @@ describe('App', () => {
     window.location.hash = `#/games/${GAME_ID}`;
     render(<App />);
 
-    fireEvent.change(await screen.findByLabelText('Michael'), { target: { value: '0' } });
+    fireEvent.change(await screen.findByLabelText('TestPlayerA'), { target: { value: '0' } });
     fireEvent.change(screen.getByLabelText('Player Two'), { target: { value: '1' } });
 
-    expect(screen.getByLabelText('Michael')).toHaveValue('0');
+    expect(screen.getByLabelText('TestPlayerA')).toHaveValue('0');
     expect(screen.getByLabelText('Player Two')).toHaveValue('1');
     fireEvent.click(screen.getByRole('button', { name: 'Save teams' }));
 

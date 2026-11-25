@@ -4,7 +4,7 @@ import { familyAction, tableSettings } from '@family-game-night/shared';
 import type { WorkerEnvironment } from '../env';
 import { ApiError } from '../errors';
 import { parseJson, requireSafeMutation } from '../request';
-import { roster } from './roster';
+import { readFamilyRoster } from './roster';
 import { act, getTable, listTables, newTable } from './tables';
 import type { TableClock } from './tables';
 
@@ -21,6 +21,8 @@ export function familyRoutes(clock: TableClock, createId: () => string) {
         contentType: c.req.header('Content-Type'),
         contentLength: c.req.header('Content-Length'),
       });
+    const roster = readFamilyRoster(c.env.FAMILY_ROSTER_JSON);
+    c.set('familyRoster', roster);
     if (c.req.path !== '/api/family/roster') {
       const name = c.req.header('X-Family-Player');
       if (!name || !roster.includes(name))
@@ -29,14 +31,23 @@ export function familyRoutes(clock: TableClock, createId: () => string) {
     }
     await next();
   });
-  app.get('/roster', (c) => c.json(roster));
+  app.get('/roster', (c) => {
+    c.header('Cache-Control', 'no-store');
+    return c.json(c.get('familyRoster'));
+  });
   app.get('/tables', async (c) => c.json(await listTables(c.env.DB, c.get('familyName'))));
   app.post('/tables', async (c) => {
     const id = c.req.header('Idempotency-Key') ?? createId();
     if (!z.uuid().safeParse(id).success)
       throw new ApiError(400, 'INVALID_REQUEST', 'Invalid table creation ID.');
     return c.json(
-      await newTable(c.env.DB, id, c.get('familyName'), await parseJson(c, tableSettings)),
+      await newTable(
+        c.env.DB,
+        id,
+        c.get('familyName'),
+        await parseJson(c, tableSettings),
+        c.get('familyRoster'),
+      ),
       201,
     );
   });
@@ -51,6 +62,7 @@ export function familyRoutes(clock: TableClock, createId: () => string) {
         c.get('familyName'),
         await parseJson(c, familyAction),
         clock,
+        c.get('familyRoster'),
       ),
     ),
   );

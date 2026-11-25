@@ -2,6 +2,7 @@ import type { UserProfileDto } from '@family-game-night/shared';
 
 export interface WorkerBindings {
   readonly FAMILY_LINK_KEY?: string;
+  readonly FAMILY_ROSTER_JSON?: string;
   readonly DB: D1Database;
   readonly ENVIRONMENT: string;
   readonly DEV_AUTH_EMAIL?: string;
@@ -24,6 +25,7 @@ export type WorkerEnvironment = {
   Bindings: WorkerBindings;
   Variables: {
     familyName: string;
+    familyRoster: string[];
     config: AppConfig;
     requestId: string;
     user: UserProfileDto;

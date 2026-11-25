@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { SeededRandomSource } from '../../../packages/sequence-engine/test/seeded-random';
 import { act, getTable, sweepTables } from '../src/family/tables';
 import { createD1Harness } from './d1-harness';
+import { testRoster } from './family-roster-fixture';
 import type { FamilyTableDetail, FamilyTable, TableSettings } from '@family-game-night/shared';
 import type { WorkerBindings } from '../src/env';
 
@@ -14,7 +15,13 @@ const clock = { random, now: () => now };
 const app = createApp({ random, now: () => new Date(now) });
 let db: D1Database, dispose: () => Promise<void>;
 let env: WorkerBindings;
-async function request(path: string, name: string, payload?: unknown, key = 'test-link') {
+async function request(
+  path: string,
+  name: string,
+  payload?: unknown,
+  key: string | null = 'test-link',
+  bindings = env,
+) {
   return app.request(
     origin + '/api/family/' + path,
     {
@@ -22,12 +29,12 @@ async function request(path: string, name: string, payload?: unknown, key = 'tes
       headers: {
         Origin: origin,
         'Content-Type': 'application/json',
-        'X-Family-Link': key,
+        ...(key === null ? {} : { 'X-Family-Link': key }),
         'X-Family-Player': name,
       },
       ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
     },
-    env,
+    bindings,
   );
 }
 async function read<T>(response: Promise<Response>) {
@@ -40,7 +47,7 @@ const action = (t: FamilyTableDetail, name: string, extra: Record<string, unknow
   request('tables/' + t.id, name, { version: t.version, ...extra });
 const create = (game: TableSettings['game'], options: Partial<TableSettings> = {}) =>
   read<FamilyTableDetail>(
-    request('tables', 'Michael', {
+    request('tables', 'TestPlayerA', {
       game,
       capacity: game === 'euchre' ? 4 : 2,
       timerDays: 1,
@@ -52,7 +59,13 @@ const create = (game: TableSettings['game'], options: Partial<TableSettings> = {
   );
 beforeAll(async () => {
   ({ db, dispose } = await createD1Harness());
-  env = { DB: db, ENVIRONMENT: 'production', APP_ORIGIN: origin, FAMILY_LINK_KEY: 'test-link' };
+  env = {
+    DB: db,
+    ENVIRONMENT: 'production',
+    APP_ORIGIN: origin,
+    FAMILY_LINK_KEY: 'test-link',
+    FAMILY_ROSTER_JSON: JSON.stringify(testRoster),
+  };
 });
 afterAll(async () => {
   await dispose();
@@ -61,7 +74,10 @@ describe('family tables', () => {
   it('requires the shared link, known name and same-origin writes', async () => {
     expect((await request('roster', '', '')).status).toBe(404);
     expect((await request('roster', '', undefined, 'wrong')).status).toBe(401);
-    expect(await read<string[]>(request('roster', ''))).toHaveLength(27);
+    expect((await request('roster', '', undefined, null)).status).toBe(401);
+    const response = await request('roster', '');
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(await response.json()).toEqual(testRoster);
     expect((await request('tables', 'Visitor')).status).toBe(401);
     expect(
       (
@@ -72,7 +88,7 @@ describe('family tables', () => {
             headers: {
               'Content-Type': 'application/json',
               'X-Family-Link': 'test-link',
-              'X-Family-Player': 'Mark',
+              'X-Family-Player': 'TestPlayerB',
             },
             body: '{}',
           },
@@ -81,30 +97,47 @@ describe('family tables', () => {
       ).status,
     ).toBe(403);
   });
+  it.each([undefined, 'not-json', '[]', '["TestPlayerA","TestPlayerA"]'])(
+    'fails closed for missing or invalid roster configuration: %s',
+    async (rosterJson) => {
+      const plainBindings = { ...env };
+      delete (plainBindings as { FAMILY_ROSTER_JSON?: string }).FAMILY_ROSTER_JSON;
+      const bindings =
+        rosterJson === undefined
+          ? plainBindings
+          : { ...plainBindings, FAMILY_ROSTER_JSON: rosterJson };
+      expect((await request('roster', '', undefined, 'wrong', bindings)).status).toBe(401);
+      const response = await request('roster', '', undefined, 'test-link', bindings);
+      expect(response.status).toBe(500);
+      expect(await response.json()).toMatchObject({
+        error: { code: 'FAMILY_UNAVAILABLE', details: {} },
+      });
+    },
+  );
   it('keeps invited lobbies private, replaces a declined invitation, and lets only the host start a full table', async () => {
     let t = await create('lantern', {
       visibility: 'invite',
-      invitees: ['Mark'],
+      invitees: ['TestPlayerB'],
       startMode: 'host',
       timerDays: 7,
     });
     const list = (name: string) => read<FamilyTable[]>(request('tables', name));
-    expect((await list('Mark')).find((row) => row.id === t.id)?.invited).toBe(true);
-    expect((await list('Jenny')).some((row) => row.id === t.id)).toBe(false);
-    expect((await request('tables/' + t.id, 'Jenny')).status).toBe(404);
-    expect((await action(t, 'Michael', { type: 'start' })).status).toBe(422);
-    expect(await read<null>(action(t, 'Mark', { type: 'decline' }))).toBeNull();
-    t = await table(t.id, 'Michael');
-    t = await read(action(t, 'Michael', { type: 'invite', name: 'Jenny' }));
-    t = await read(action(t, 'Jenny', { type: 'join' }));
+    expect((await list('TestPlayerB')).find((row) => row.id === t.id)?.invited).toBe(true);
+    expect((await list('TestPlayerAA')).some((row) => row.id === t.id)).toBe(false);
+    expect((await request('tables/' + t.id, 'TestPlayerAA')).status).toBe(404);
+    expect((await action(t, 'TestPlayerA', { type: 'start' })).status).toBe(422);
+    expect(await read<null>(action(t, 'TestPlayerB', { type: 'decline' }))).toBeNull();
+    t = await table(t.id, 'TestPlayerA');
+    t = await read(action(t, 'TestPlayerA', { type: 'invite', name: 'TestPlayerAA' }));
+    t = await read(action(t, 'TestPlayerAA', { type: 'join' }));
     expect(t.status).toBe('lobby');
-    expect(t.players).toEqual(['Michael', 'Jenny']);
-    expect((await action(t, 'Jenny', { type: 'start' })).status).toBe(422);
-    t = await read(action(t, 'Michael', { type: 'start' }));
+    expect(t.players).toEqual(['TestPlayerA', 'TestPlayerAA']);
+    expect((await action(t, 'TestPlayerAA', { type: 'start' })).status).toBe(422);
+    t = await read(action(t, 'TestPlayerA', { type: 'start' }));
     expect(t.status).toBe('active');
     expect(t.due).toBe(now + 7 * 86400000);
     expect(t.play?.hand).toHaveLength(6);
-    expect((await table(t.id, 'Jenny')).play?.hand).not.toEqual(t.play?.hand);
+    expect((await table(t.id, 'TestPlayerAA')).play?.hand).not.toEqual(t.play?.hand);
   });
   it('handles a retried creation and validates the selected team count', async () => {
     const id = crypto.randomUUID();
@@ -126,7 +159,7 @@ describe('family tables', () => {
             Origin: origin,
             'Content-Type': 'application/json',
             'X-Family-Link': 'test-link',
-            'X-Family-Player': 'Michael',
+            'X-Family-Player': 'TestPlayerA',
             'Idempotency-Key': id,
           },
           body: JSON.stringify(settings),
@@ -140,11 +173,11 @@ describe('family tables', () => {
     ]);
     expect(a.id).toBe(b.id);
     expect(a.teams).toBe(3);
-    expect((await request('tables', 'Michael', { ...settings, capacity: 4 })).status).toBe(422);
+    expect((await request('tables', 'TestPlayerA', { ...settings, capacity: 4 })).status).toBe(422);
   });
   it('advances a closed table from the Worker scheduled handler and preserves a future deadline', async () => {
     const lobby = await create('lantern');
-    const t = await read<FamilyTableDetail>(action(lobby, 'Mark', { type: 'join' }));
+    const t = await read<FamilyTableDetail>(action(lobby, 'TestPlayerB', { type: 'join' }));
     const scheduled = { cron: '* * * * *', scheduledTime: Date.now(), noRetry() {} };
     await worker.scheduled(scheduled, env);
     const stored = () =>
@@ -161,10 +194,10 @@ describe('family tables', () => {
   it('awards the last open seat once, auto-deals, and rejects a repeated move', async () => {
     const lobby = await create('lines');
     const responses = await Promise.all(
-      ['Mark', 'Jenny'].map((p) => action(lobby, p, { type: 'join' })),
+      ['TestPlayerB', 'TestPlayerAA'].map((p) => action(lobby, p, { type: 'join' })),
     );
     expect(responses.filter((r) => r.ok)).toHaveLength(1);
-    let t = await table(lobby.id, 'Michael');
+    let t = await table(lobby.id, 'TestPlayerA');
     expect(t.status).toBe('active');
     expect(t.version).toBe(2);
     const name = t.turn!;
@@ -180,8 +213,8 @@ describe('family tables', () => {
       const rng = new SeededRandomSource(521);
       const live = { random: rng, now: () => now };
       let t = await create(game);
-      for (const p of ['Mark', 'Jenny', 'Kelley'].slice(0, t.capacity - 1))
-        t = (await act(db, t.id, p, { type: 'join', version: t.version }, live))!;
+      for (const p of ['TestPlayerB', 'TestPlayerAA', 'TestPlayerC'].slice(0, t.capacity - 1))
+        t = (await act(db, t.id, p, { type: 'join', version: t.version }, live, testRoster))!;
       for (let n = 0; n < 10000 && t.turn; n++) {
         const name = t.turn;
         t = await getTable(db, t.id, name, live);
@@ -196,9 +229,16 @@ describe('family tables', () => {
         const max = Math.max(...pref);
         const indexes = pref.flatMap((v, i) => (v === max ? [i] : []));
         const index = indexes[rng.randomInt(indexes.length)]!;
-        t = (await act(db, t.id, name, { version: t.version, type: 'move', index }, live))!;
+        t = (await act(
+          db,
+          t.id,
+          name,
+          { version: t.version, type: 'move', index },
+          live,
+          testRoster,
+        ))!;
       }
-      const final = await table(t.id, 'Mark');
+      const final = await table(t.id, 'TestPlayerB');
       expect(final.status).toBe('finished');
       expect(final.due).toBeNull();
       expect(final.turn).toBeNull();
@@ -212,7 +252,7 @@ describe('family tables', () => {
     async (game) => {
       now += 8 * 86400000;
       let t = await create(game);
-      for (const p of ['Mark', 'Jenny', 'Kelley'].slice(0, t.capacity - 1))
+      for (const p of ['TestPlayerB', 'TestPlayerAA', 'TestPlayerC'].slice(0, t.capacity - 1))
         t = await read(action(t, p, { type: 'join' }));
       const actor = t.turn!;
       if (game === 'lantern' || game === 'phase') {

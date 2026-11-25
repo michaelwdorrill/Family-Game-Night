@@ -9,7 +9,6 @@ import type { RandomSource } from '@family-game-night/sequence-engine';
 import { ApiError } from '../errors';
 import { activeSeat, deal, matchSummary, playerView, playMove, turnChanged } from './play';
 import type { Match } from './play';
-import { roster } from './roster';
 
 interface Metadata extends Omit<FamilyTable, 'id' | 'version' | 'due' | 'invited'> {
   invitees: string[];
@@ -169,7 +168,13 @@ export async function listTables(db: D1Database, name: string) {
     .all<Row>();
   return results.map((r) => summary(fromRow(r), name));
 }
-export async function newTable(db: D1Database, id: string, name: string, settings: TableSettings) {
+export async function newTable(
+  db: D1Database,
+  id: string,
+  name: string,
+  settings: TableSettings,
+  roster: readonly string[],
+) {
   const { invitees, capacity, visibility, game } = settings;
   check(
     (familyGames[game].counts as readonly number[]).includes(capacity),
@@ -223,6 +228,7 @@ export async function act(
   name: string,
   action: FamilyAction,
   clock: TableClock,
+  roster: readonly string[],
 ) {
   const t = await load(db, id);
   const m = t.meta;
