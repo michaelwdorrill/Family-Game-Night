@@ -38,7 +38,7 @@ APP_ORIGIN = "https://familygamenight.website"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "family-game-night"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "0686bd2d-23c7-47a5-8d2f-816f6e7e4234"
 migrations_dir = "../../migrations"
 
 [triggers]
