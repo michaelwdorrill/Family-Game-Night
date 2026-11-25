@@ -15,13 +15,7 @@ const clock = { random, now: () => now };
 const app = createApp({ random, now: () => new Date(now) });
 let db: D1Database, dispose: () => Promise<void>;
 let env: WorkerBindings;
-async function request(
-  path: string,
-  name: string,
-  payload?: unknown,
-  key: string | null = 'test-link',
-  bindings = env,
-) {
+async function request(path: string, name: string, payload?: unknown, bindings = env) {
   return app.request(
     origin + '/api/family/' + path,
     {
@@ -29,7 +23,6 @@ async function request(
       headers: {
         Origin: origin,
         'Content-Type': 'application/json',
-        ...(key === null ? {} : { 'X-Family-Link': key }),
         'X-Family-Player': name,
       },
       ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
@@ -63,7 +56,6 @@ beforeAll(async () => {
     DB: db,
     ENVIRONMENT: 'production',
     APP_ORIGIN: origin,
-    FAMILY_LINK_KEY: 'test-link',
     FAMILY_ROSTER_JSON: JSON.stringify(testRoster),
   };
 });
@@ -71,11 +63,10 @@ afterAll(async () => {
   await dispose();
 });
 describe('family tables', () => {
-  it('requires the shared link, known name and same-origin writes', async () => {
+  it('serves the roster at first visit and requires a known name and same-origin writes', async () => {
     expect((await request('roster', '', '')).status).toBe(404);
-    expect((await request('roster', '', undefined, 'wrong')).status).toBe(401);
-    expect((await request('roster', '', undefined, null)).status).toBe(401);
-    const response = await request('roster', '');
+    const response = await app.request(origin + '/api/family/roster', {}, env);
+    expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
     expect(await response.json()).toEqual(testRoster);
     expect((await request('tables', 'Visitor')).status).toBe(401);
@@ -87,7 +78,6 @@ describe('family tables', () => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-Family-Link': 'test-link',
               'X-Family-Player': 'TestPlayerB',
             },
             body: '{}',
@@ -106,8 +96,7 @@ describe('family tables', () => {
         rosterJson === undefined
           ? plainBindings
           : { ...plainBindings, FAMILY_ROSTER_JSON: rosterJson };
-      expect((await request('roster', '', undefined, 'wrong', bindings)).status).toBe(401);
-      const response = await request('roster', '', undefined, 'test-link', bindings);
+      const response = await request('roster', '', undefined, bindings);
       expect(response.status).toBe(500);
       expect(await response.json()).toMatchObject({
         error: { code: 'FAMILY_UNAVAILABLE', details: {} },
@@ -158,7 +147,6 @@ describe('family tables', () => {
           headers: {
             Origin: origin,
             'Content-Type': 'application/json',
-            'X-Family-Link': 'test-link',
             'X-Family-Player': 'TestPlayerA',
             'Idempotency-Key': id,
           },

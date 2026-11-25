@@ -10,7 +10,7 @@ import type {
   FamilyTableDetail,
   TableSettings,
 } from '@family-game-night/shared';
-import { familyRequest, FamilyError, linkStorage, nameStorage } from './api';
+import { familyRequest, FamilyError, nameStorage } from './api';
 
 type Props = { name: string; roster: string[] };
 const title = (t: FamilyTable) => t.title ?? `${t.host}’s ${familyGames[t.game].title} table`;
@@ -624,22 +624,13 @@ function TablePage({ name, roster, id }: Props & { id: string }) {
       {action.error && !choices && <p role="alert">{action.error.message}</p>}
       <button
         className="button quiet"
-        onClick={() =>
-          setShare(
-            location.origin +
-              location.pathname +
-              '#/table/' +
-              id +
-              '?family=' +
-              encodeURIComponent(localStorage.getItem(linkStorage) ?? ''),
-          )
-        }
+        onClick={() => setShare(location.origin + location.pathname + '#/table/' + id)}
       >
         Share table link
       </button>
       {share && (
         <label>
-          Family link
+          Table link
           <input readOnly value={share} onFocus={(e) => e.target.select()} />
         </label>
       )}
@@ -653,23 +644,19 @@ function TableRoute(props: Props) {
 export function FamilyHub() {
   const cache = useQueryClient();
   const [name, setName] = useState(() => localStorage.getItem(nameStorage) ?? '');
-  const linked = Boolean(localStorage.getItem(linkStorage));
   const roster = useQuery({
     queryKey: ['family-roster'],
     queryFn: () => familyRequest<string[]>('roster'),
-    enabled: linked,
     retry: false,
   });
-  if (!linked || roster.error)
+  if (roster.error)
     return (
       <main className="centered-page">
         <h1>Family Game Night</h1>
-        <p role="status">{roster.error?.message ?? 'Open the shared family link to join.'}</p>
-        {linked && (
-          <button className="button secondary" onClick={() => void roster.refetch()}>
-            Try again
-          </button>
-        )}
+        <p role="status">{roster.error.message}</p>
+        <button className="button secondary" onClick={() => void roster.refetch()}>
+          Try again
+        </button>
       </main>
     );
   if (!roster.data) return <main className="centered-page">Opening game night…</main>;

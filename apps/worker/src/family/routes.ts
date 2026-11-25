@@ -11,9 +11,6 @@ import type { TableClock } from './tables';
 export function familyRoutes(clock: TableClock, createId: () => string) {
   const app = new Hono<WorkerEnvironment>();
   app.use('*', async (c, next) => {
-    const key = c.env.FAMILY_LINK_KEY;
-    if (!key || c.req.header('X-Family-Link') !== key)
-      throw new ApiError(401, 'FAMILY_LINK_REQUIRED', 'Open the current shared family link.');
     if (c.req.method === 'POST')
       requireSafeMutation({
         appOrigin: c.env.APP_ORIGIN ?? new URL(c.req.url).origin,

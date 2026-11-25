@@ -1,6 +1,6 @@
 # Family Game Night
 
-Family Game Night is a link-only, asynchronous game hub. Family members choose their name and play Card Lines, partnership Euchre, Phase Rummy (the ten-phase game), or Lantern Rummy. Mexican Train Dominoes is waiting for the family ruleset.
+Family Game Night is an asynchronous game hub with honor-system name selection. Family members choose their name and play Card Lines, partnership Euchre, Phase Rummy (the ten-phase game), or Lantern Rummy. Mexican Train Dominoes is waiting for the family ruleset.
 
 Hosts can open a table to everyone or invite selected players, choose whether a full table starts automatically, and set a turn timer. A Cloudflare Worker plays a random legal turn when time expires. Open the [family hub guide](docs/FAMILY_TABLES.md) for game rules, local play and Cloudflare deployment.
 
@@ -19,7 +19,7 @@ Copy-Item .dev.vars.example apps\worker\.dev.vars
 
 The launcher creates repository-local Corepack shims without Administrator access, verifies the exact lockfile, applies local D1 migrations, and starts both services. If the shims are already on `PATH`, `pnpm dev` starts the same services without reinstalling or migrating.
 
-With the example local configuration, open `http://127.0.0.1:5173/#/?family=local-family-preview`. Vite proxies the API to the Worker on port 8787. Keep `APP_ORIGIN` equal to the browser origin. Earlier Access-backed Card Lines games use `/#/classic`.
+With the example local configuration, open `http://127.0.0.1:5173/`. Vite proxies the API to the Worker on port 8787. Keep `APP_ORIGIN` equal to the browser origin. Earlier Access-backed Card Lines games use `/#/classic`.
 
 ## Try Euchre and Lantern Rummy locally
 

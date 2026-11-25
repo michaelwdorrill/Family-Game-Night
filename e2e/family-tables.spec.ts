@@ -11,7 +11,6 @@ function familySession(origin: string, db: D1Database) {
   const app = createApp({ random });
   const env = {
     ENVIRONMENT: 'production',
-    FAMILY_LINK_KEY: 'browser-test',
     FAMILY_ROSTER_JSON: JSON.stringify(testRoster),
     DB: db,
     APP_ORIGIN: origin,
@@ -65,7 +64,7 @@ test('four family members start an invited Euchre table, play a hand and resume 
     Page,
   ];
   try {
-    const link = origin + '/#/?family=browser-test';
+    const link = origin + '/';
     await arrive(host, link, 'TestPlayerA');
     await host
       .getByRole('article')
@@ -94,7 +93,11 @@ test('four family members start an invited Euchre table, play a hand and resume 
     await host.reload();
     await host.getByRole('button', { name: 'Start game' }).click();
     await expect(host.getByText('Waiting on TestPlayerB', { exact: true })).toBeVisible();
-    await arrive(second, tableUrl + '?family=browser-test', 'TestPlayerB');
+    // Existing bookmarked invitations still arrive at the same table with a clean URL.
+    await second.addInitScript(() => localStorage.setItem('family-game-night.link', 'obsolete'));
+    await arrive(second, tableUrl + '?family=obsolete', 'TestPlayerB');
+    await expect(second).toHaveURL(tableUrl);
+    expect(await second.evaluate(() => localStorage.getItem('family-game-night.link'))).toBeNull();
     await expect(second.getByText('Your turn', { exact: true })).toBeVisible();
     await second
       .getByRole('button', { name: /^Call .* with partner/ })
@@ -149,7 +152,7 @@ test('an open Phase Rummy lobby deals automatically and a timer hands play back 
   );
   const guest = await guestContext.newPage();
   try {
-    const link = origin + '/#/?family=browser-test';
+    const link = origin + '/';
     await arrive(page, link, 'TestPlayerA');
     const tile = page
       .getByRole('article')
@@ -161,7 +164,10 @@ test('an open Phase Rummy lobby deals automatically and a timer hands play back 
     await page.getByRole('button', { name: 'Create lobby' }).click();
     await expect(page.getByRole('heading', { name: 'Sunday game' })).toBeVisible();
     const id = page.url().split('/table/')[1]!;
-    await arrive(guest, origin + '/#/table/' + id + '?family=browser-test', 'TestPlayerB');
+    await page.getByRole('button', { name: 'Share table link' }).click();
+    const shareLink = page.getByLabel('Table link');
+    await expect(shareLink).toHaveValue(origin + '/#/table/' + id);
+    await arrive(guest, await shareLink.inputValue(), 'TestPlayerB');
     await guest.getByRole('button', { name: 'Join table' }).click();
     await expect(guest.getByText('Waiting on TestPlayerA', { exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Family Game Night' }).click();

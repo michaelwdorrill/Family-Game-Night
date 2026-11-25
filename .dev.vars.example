@@ -6,5 +6,4 @@ ADMIN_EMAIL=admin@example.test
 APP_ORIGIN=http://127.0.0.1:5173
 ACCESS_TEAM_DOMAIN=example.cloudflareaccess.com
 ACCESS_AUDIENCE=replace-with-access-application-audience
-FAMILY_LINK_KEY=local-family-preview
 FAMILY_ROSTER_JSON='["SamplePlayerA","SamplePlayerB","SamplePlayerC","SamplePlayerD"]'

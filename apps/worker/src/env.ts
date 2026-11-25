@@ -1,7 +1,6 @@
 import type { UserProfileDto } from '@family-game-night/shared';
 
 export interface WorkerBindings {
-  readonly FAMILY_LINK_KEY?: string;
   readonly FAMILY_ROSTER_JSON?: string;
   readonly DB: D1Database;
   readonly ENVIRONMENT: string;

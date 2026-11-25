@@ -1,16 +1,5 @@
-export const linkStorage = 'family-game-night.link';
 export const nameStorage = 'family-game-night.player';
 
-export function rememberFamilyLink() {
-  const [path, search] = location.hash.split('?');
-  const key = new URLSearchParams(search).get('family');
-  if (key) {
-    localStorage.setItem(linkStorage, key);
-    history.replaceState(null, '', location.pathname + location.search + (path || '#/'));
-    return true;
-  }
-  return false;
-}
 export class FamilyError extends Error {
   constructor(
     message: string,
@@ -26,9 +15,7 @@ export async function familyRequest<T>(
   body?: unknown,
   creationId?: string,
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    'X-Family-Link': localStorage.getItem(linkStorage) ?? '',
-  };
+  const headers: Record<string, string> = {};
   if (creationId) headers['Idempotency-Key'] = creationId;
   if (name) headers['X-Family-Player'] = name;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
