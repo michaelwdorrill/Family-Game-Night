@@ -14,10 +14,11 @@ migrations_dir = "../../migrations"
 
 [env.staging]
 name = "family-game-night-api-staging"
-workers_dev = false
+workers_dev = true
 
 [env.staging.vars]
 ENVIRONMENT = "staging"
+APP_ORIGIN = "https://family-game-night-api-staging.homebase-app.workers.dev"
 
 [[env.staging.d1_databases]]
 binding = "DB"
